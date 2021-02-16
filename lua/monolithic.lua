@@ -18,6 +18,7 @@ M.ext = {
 	["html"] = "html", 
 	["htm"] = "html",
 	["sh"] = "sh",
+	["scm"] = "scheme",
 	-- ["txt"] = "",
 	-- ["md"] = "markdown",
 }
