@@ -16,10 +16,10 @@ M.ext = {
 	["hs"] = "haskell",
 	["css"] = "css",
 	["html"] = "html", 
-	["htm"] = "htm",
+	["htm"] = "html",
 	["sh"] = "sh",
-	["txt"] = "",
-	["md"] = "md",
+	-- ["txt"] = "",
+	-- ["md"] = "markdown",
 }
 
 function M.open()
