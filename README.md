@@ -6,7 +6,8 @@
 
 ## Requirements
 
-Neovim 0.5
+* Neovim 0.5
+* [nvim-treesitter](https://github.com/nvim-treesitter/nvim-treesitter) for correct embedded syntax highlighting (optional but recommended)
 
 ## Install
 
@@ -18,6 +19,8 @@ Add this to your plug-in list:
 Plug 'jbyuki/monolithic.vim'
 ```
 
+
+
 ## Get started
 
 Add the following to your `init.vim`:
@@ -26,41 +29,36 @@ Add the following to your `init.vim`:
 command OpenAll lua require"monolithic".open()
 ```
 
-or your `init.lua`:
-
-```lua
-vim.api.nvim_command([[command OpenAll lua require"monolithic".open()]])
-```
-
-**Optional**: For correct embedded syntax highlighting support install [nvim-treesitter](https://github.com/nvim-treesitter/nvim-treesitter). (highly recommended)
-
 ## Basic usage
 
-* Change the working directory to your project's directory using `:cd`.
-* Invoke **monolithic** using `:OpenAll`
+1. Change the working directory to your project's directory using `:cd`.
+2. Invoke **monolithic** using `:OpenAll` or `:lua require"monolithic.open()`.
 
 ## Configuration
 
 #### Add additionnal filetypes
 
 `init.vim`
-```vim
+```lua
 lua << END
-require"monolithic".ext["extension_here"] = "syntax_filename_here"
+require"monolithic".setup {
+	-- add additionnal extensions to be deteted for syntax highlighting
+	-- existing defaults can also be replaced
+	ext_map = { 
+		"md" = "markdown"
+	},
+
+	-- highlight group for header with filename
+	header_hl_group = "Title",
+
+	-- header styling
+	header_pre = "## ",  
+	header_post = " #####",
+}
 END
 ```
 
-Note: See `:lua print(vim.inspect(require"monolithic".ext["extension_here"]))` for the default configuration.
-
-#### Change the filename header styling
-
-`init.vim`
-```vim
-lua << END
-require"monolithic".header_pre = "## "
-require"monolithic".header_post = " ###########"
-END
-```
+Note: See `:lua print(vim.inspect(require"monolithic"._ext_map))` for the default configuration.
 
 ## But why?
 
