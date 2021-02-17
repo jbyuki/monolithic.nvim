@@ -32,7 +32,7 @@ command OpenAll lua require"monolithic".open()
 ## Basic usage
 
 1. Change the working directory to your project's directory using `:cd`.
-2. Invoke **monolithic** using `:OpenAll` or `:lua require"monolithic.open()`.
+2. Invoke **monolithic** using `:OpenAll` or `:lua require"monolithic".open()`.
 
 ## Configuration
 
