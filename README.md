@@ -32,6 +32,8 @@ or your `init.lua`:
 vim.api.nvim_command([[command OpenAll lua require"monolithic".open()]])
 ```
 
+**Optional**: For correct embedded syntax highlighting support install [nvim-treesitter](https://github.com/nvim-treesitter/nvim-treesitter). (highly recommended)
+
 ## Basic usage
 
 * Change the working directory to your project's directory using `:cd`.
