@@ -3,6 +3,7 @@
 local M = {}
 
 @configuration_variables
+@script_variables
 @functions
 
 return M
@@ -16,6 +17,7 @@ function M.open()
 	@set_buffer_as_current
 	@include_syntax_highlight_for_languages
 	@add_files_to_buffer_one_by_one
+	@setup_treesitter_syntax_highlighting
 	@setup_syn_sync
 end
 
@@ -66,7 +68,13 @@ for _, file in ipairs(valid_files) do
 	@add_filename_in_buffer
 	@read_filecontent
 	@add_filecontent_in_buffer
-	@syntax_highlight_filecontent_with_proper_highlighting
+
+	@compute_region_to_highlight
+	@create_treesitter_parser
+	if not parser and (M.ext[ext]  and M.ext[ext] ~= "") then
+		@syntax_highlight_filecontent_with_proper_highlighting
+		@set_using_standard_syntax_highlighting
+	end
 	@close_fold_around_file
 end
 
@@ -107,17 +115,47 @@ end
 local block_num = 1
 
 @syntax_highlight_filecontent_with_proper_highlighting+=
+vim.api.nvim_command("syn region block" .. block_num .. " start=\"\\%" .. startlnum .. "l\" end=\"\\%" .. endlnum .. "l\" contains=@" .. M.ext[ext])
+
+@close_fold_around_file+=
+vim.api.nvim_command((startlnum-1) .. "," .. (endlnum-1) .. "fold")
+
+@compute_region_to_highlight+=
 local startlnum = lnum - #lines + 1
 local endlnum = lnum + 1
 
 local ext = vim.fn.fnamemodify(file, ":e")
 
-if M.ext[ext]  and M.ext[ext] ~= "" then
-	vim.api.nvim_command("syn region block" .. block_num .. " start=\"\\%" .. startlnum .. "l\" end=\"\\%" .. endlnum .. "l\" contains=@" .. M.ext[ext])
-end
+@add_files_to_buffer_one_by_one-=
+local standard_syntax = false
+
+@set_using_standard_syntax_highlighting+=
+standard_syntax = true
 
 @setup_syn_sync+=
-vim.api.nvim_command("syn sync fromstart")
+if standard_syntax then
+	vim.api.nvim_command("syn sync fromstart")
+end
 
-@close_fold_around_file+=
-vim.api.nvim_command((startlnum-1) .. "," .. (endlnum-1) .. "fold")
+@add_files_to_buffer_one_by_one-=
+local all_regions = {}
+
+@create_treesitter_parser+=
+local parser
+if M.ext[ext] and M.ext[ext] ~= "" then
+	parser = vim.treesitter.get_parser(buf, M.ext[ext])
+end
+if parser then
+	local lang = M.ext[ext]
+	all_regions[lang] = all_regions[lang] or {}
+	table.insert(all_regions[lang], { {
+		startlnum-1, 0, endlnum-1, 0
+	} })
+end
+
+@setup_treesitter_syntax_highlighting+=
+for lang, regions in pairs(all_regions) do
+	local parser = vim.treesitter.get_parser(buf, lang)
+	parser:set_included_regions(regions)
+	vim.treesitter.highlighter.new(parser, {})
+end

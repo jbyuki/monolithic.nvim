@@ -51,6 +51,10 @@ function M.open()
 		end
 	end
 	
+	local all_regions = {}
+	
+	local standard_syntax = false
+	
 	local block_num = 1
 	
 	local lnum = 0
@@ -72,19 +76,42 @@ function M.open()
 		vim.api.nvim_buf_set_lines(0, -1, -1, true, lines)
 		lnum = lnum + #lines
 		
+	
 		local startlnum = lnum - #lines + 1
 		local endlnum = lnum + 1
 		
 		local ext = vim.fn.fnamemodify(file, ":e")
 		
-		if M.ext[ext]  and M.ext[ext] ~= "" then
-			vim.api.nvim_command("syn region block" .. block_num .. " start=\"\\%" .. startlnum .. "l\" end=\"\\%" .. endlnum .. "l\" contains=@" .. M.ext[ext])
+		local parser
+		if M.ext[ext] and M.ext[ext] ~= "" then
+			parser = vim.treesitter.get_parser(buf, M.ext[ext])
+		end
+		if parser then
+			local lang = M.ext[ext]
+			all_regions[lang] = all_regions[lang] or {}
+			table.insert(all_regions[lang], { {
+				startlnum-1, 0, endlnum-1, 0
+			} })
 		end
 		
+		if not parser and (M.ext[ext]  and M.ext[ext] ~= "") then
+			vim.api.nvim_command("syn region block" .. block_num .. " start=\"\\%" .. startlnum .. "l\" end=\"\\%" .. endlnum .. "l\" contains=@" .. M.ext[ext])
+			
+			standard_syntax = true
+			
+		end
 		vim.api.nvim_command((startlnum-1) .. "," .. (endlnum-1) .. "fold")
+		
 	end
 	
-	vim.api.nvim_command("syn sync fromstart")
+	for lang, regions in pairs(all_regions) do
+		local parser = vim.treesitter.get_parser(buf, lang)
+		parser:set_included_regions(regions)
+		vim.treesitter.highlighter.new(parser, {})
+	end
+	if standard_syntax then
+		vim.api.nvim_command("syn sync fromstart")
+	end
 	
 end
 
