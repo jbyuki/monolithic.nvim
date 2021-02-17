@@ -54,6 +54,9 @@ require"monolithic".setup {
 	-- header styling
 	header_pre = "## ",  
 	header_post = " #####",
+
+	-- line numbering is disabled by default
+	hide_line_numbering = false,
 }
 END
 ```

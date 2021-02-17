@@ -48,6 +48,7 @@ function M.setup(opts)
 		header_hl_group = { opts.header_hl_group, 's', true },
 		header_pre = { opts.header_pre, 's', true },
 		header_post = { opts.header_post, 's', true },
+		hide_line_numbering = { opts.hide_line_numbering, 'b', true },
 	}
 
 	if opts.ext_map then
@@ -67,17 +68,10 @@ function M.setup(opts)
 end
 
 function M.setup_view(opts) 
-	if opts.header_hl_group then
-		M._view_opts.header_hl_group = opts.header_hl_group
-	end
-
-	if opts.header_pre then
-		M._view_opts.header_pre = opts.header_pre
-	end
-
-	if opts.header_post then
-		M._view_opts.header_post = opts.header_post
-	end
+	M._view_opts.header_hl_group = opts.header_hl_group
+	M._view_opts.header_pre = opts.header_pre
+	M._view_opts.header_post = opts.header_post
+	M._view_opts.hide_line_numbering = opts.hide_line_numbering
 end
 
 -- Open monolithic buffer in current window
@@ -90,6 +84,7 @@ function M.open()
 	v:set_as_current_buf()
 	v:enable_syntax_highlighting()
 	v:create_folds()
+	v:disable_line_numbering()
 end
 
 
