@@ -116,8 +116,8 @@ function view:disable_line_numbering()
 	if self._hide_line_numbering == nil or self._hide_line_numbering then
 		assert(api.nvim_get_current_buf() == self._buffer)
 
-		api.nvim_command("set nonumber")
-		api.nvim_command("set norelativenumber")
+		api.nvim_command("setlocal nonumber")
+		api.nvim_command("setlocal norelativenumber")
 	end
 end
 
