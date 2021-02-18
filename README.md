@@ -63,6 +63,14 @@ END
 
 Note: See `:lua print(vim.inspect(require"monolithic"._ext_map))` for the default configuration.
 
+## Features to explore
+
+* [ ] Read/Write
+* [ ] LSP support
+* [ ] Show filename in status line or external floats
+* [ ] Add/Remove files to buffer
+* [ ] Create new file within buffer
+
 ## But why?
 
 With current programming methodologies, source code is often split up into multiple small modules. When you read the source code for the first time, it's often a pain to navigate between the files without the proper tools.
