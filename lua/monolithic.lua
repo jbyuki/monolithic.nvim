@@ -38,7 +38,7 @@ ft.set_lookup(M._ext_map)
 
 M._view_opts = {}
 
-local hide_line_numbering = false
+local hide_line_numbering = true
 
 function M.setup(opts)
   validate {

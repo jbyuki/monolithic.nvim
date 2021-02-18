@@ -70,6 +70,7 @@ Note: See `:lua print(vim.inspect(require"monolithic"._ext_map))` for the defaul
 * [ ] Show filename in status line or external floats
 * [ ] Add/Remove files to buffer
 * [ ] Create new file within buffer
+* [ ] Reorder files
 
 ## But why?
 
