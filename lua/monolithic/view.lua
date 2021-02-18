@@ -16,7 +16,6 @@ function view.new(opts)
     _langs_set = {},
     _lnum = 0,
     _header_lnums = {},
-    _hide_line_numbering = opts.hide_line_numbering
   }
 
   return setmetatable(new_view, {
@@ -113,12 +112,10 @@ end
 
 -- create folds based on regions
 function view:disable_line_numbering()
-  if self._hide_line_numbering == nil or self._hide_line_numbering then
-    assert(api.nvim_get_current_buf() == self._buffer)
+  assert(api.nvim_get_current_buf() == self._buffer)
 
-    api.nvim_command("setlocal nonumber")
-    api.nvim_command("setlocal norelativenumber")
-  end
+  api.nvim_command("setlocal nonumber")
+  api.nvim_command("setlocal norelativenumber")
 end
 
 return view

@@ -38,6 +38,8 @@ ft.set_lookup(M._ext_map)
 
 M._view_opts = {}
 
+local hide_line_numbering = false
+
 function M.setup(opts)
   validate {
     opts = { opts, 't' };
@@ -64,6 +66,10 @@ function M.setup(opts)
     ft.set_lookup(M._ext_map)
   end
 
+  if opts.hide_line_numbering ~= nil then
+    hide_line_numbering = opts.hide_line_numbering
+  end
+
   M.setup_view(opts)
 end
 
@@ -71,7 +77,6 @@ function M.setup_view(opts)
   M._view_opts.header_hl_group = opts.header_hl_group
   M._view_opts.header_pre = opts.header_pre
   M._view_opts.header_post = opts.header_post
-  M._view_opts.hide_line_numbering = opts.hide_line_numbering
 end
 
 -- Open monolithic buffer in current window
@@ -84,7 +89,9 @@ function M.open()
   v:set_as_current_buf()
   v:enable_syntax_highlighting()
   v:create_folds()
-  v:disable_line_numbering()
+  if hide_line_numbering then
+    v:disable_line_numbering()
+  end
 end
 
 
