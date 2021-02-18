@@ -6,9 +6,13 @@ local ts = vim.treesitter
 function highlight.is_treesitter_supported(buf, langs)
   local is_supported = true
   local langs_set = utils.make_set_from_keys(langs)
+  if vim.tbl_count(langs_set) > 1 then
+    return false
+  end
+
   for lang, _ in pairs(langs_set) do
-    local parser = ts.get_parser(buf, lang)
-    if not parser then
+    local success = pcall(ts.get_parser, buf, lang)
+    if not success then
       is_supported = false
     end
   end
@@ -52,6 +56,12 @@ function highlight.highlight_with_vim(buf, langs, regions)
   assert(api.nvim_get_current_buf() == buf)
 
   vim.api.nvim_command("syn clear")
+
+  local lang_set = utils.make_set_from_keys(langs)
+  for lang,_ in pairs(lang_set) do
+    vim.api.nvim_command("syn include @" .. lang .. " syntax/" .. lang .. ".vim")
+    vim.api.nvim_command("unlet b:current_syntax")
+  end
 
   local block_num = 1
   for i=1,#langs do
