@@ -1,6 +1,8 @@
 local view = require "monolithic.view"
 local ft = require "monolithic.filetype"
 local explore = require "monolithic.explore"
+local action = require "monolithic.action"
+local history = require "monolithic.history"
 local validate = vim.validate
 
 local M = {}
@@ -37,6 +39,7 @@ M._ext_map = {
 ft.set_lookup(M._ext_map)
 
 M._view_opts = {}
+M._views = {}
 
 local hide_line_numbering = true
 
@@ -81,7 +84,6 @@ end
 
 -- Open monolithic buffer in current window
 function M.open()
-
   local v = view.new(M._view_opts)
   local files = explore.cwd(M._ext_map)
 
@@ -92,7 +94,20 @@ function M.open()
   if hide_line_numbering then
     v:disable_line_numbering()
   end
+  v:attach_actions()
+
+  M._views[v._buffer] = v
+
+  history.add(vim.fn.getcwd())
 end
 
+function M._get_view(bufnr)
+  return M._views[bufnr]
+end
+
+function M.jump_edit()
+  local v = M._get_view(vim.api.nvim_get_current_buf())
+  action.jump_to_file(v)
+end
 
 return M

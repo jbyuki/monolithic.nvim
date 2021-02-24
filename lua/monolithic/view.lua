@@ -16,6 +16,7 @@ function view.new(opts)
     _langs_set = {},
     _lnum = 0,
     _header_lnums = {},
+    _keymap_edit = opts.keymap_edit or "<tab>"
   }
 
   return setmetatable(new_view, {
@@ -116,6 +117,24 @@ function view:disable_line_numbering()
 
   api.nvim_command("setlocal nonumber")
   api.nvim_command("setlocal norelativenumber")
+end
+
+-- get filename and line number at lnum
+function view:get_location_at(lnum)
+  lnum = lnum - 1
+  assert(lnum >= 0 and lnum < self._lnum)
+
+  for i, region in ipairs(self._regions) do
+    if lnum >= region[1] and lnum < region[2] then
+      return self._filenames[i], (lnum-region[1])+1
+    end
+  end
+end
+
+function view:attach_actions()
+  if self._keymap_edit then
+    vim.api.nvim_buf_set_keymap(self._buffer, 'n', self._keymap_edit, [[<cmd>lua require"monolithic".jump_edit()<CR>]], { noremap = true })
+  end
 end
 
 return view

@@ -71,6 +71,8 @@ Note: See `:lua print(vim.inspect(require"monolithic"._ext_map))` for the defaul
 * [ ] Add/Remove files to buffer
 * [ ] Create new file within buffer
 * [ ] Reorder files
+* [ ] Open multi-file buffer from MRU
+* [ ] Jump to file from buffer
 
 ## But why?
 
