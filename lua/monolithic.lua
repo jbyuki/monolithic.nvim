@@ -54,6 +54,7 @@ function M.setup(opts)
     header_pre = { opts.header_pre, 's', true },
     header_post = { opts.header_post, 's', true },
     hide_line_numbering = { opts.hide_line_numbering, 'b', true },
+    history_save_file = { opts.history_save_file, 's', true },
   }
 
   if opts.ext_map then
@@ -73,6 +74,9 @@ function M.setup(opts)
     hide_line_numbering = opts.hide_line_numbering
   end
 
+  if opts.history_save_file ~= nil then
+    history._save_file = opts.history_save_file
+  end
   M.setup_view(opts)
 end
 
