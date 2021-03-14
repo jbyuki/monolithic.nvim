@@ -3,7 +3,9 @@ local ft = require "monolithic.filetype"
 local explore = require "monolithic.explore"
 local action = require "monolithic.action"
 local history = require "monolithic.history"
+local writer = require "monolithic.writer"
 local validate = vim.validate
+local api = vim.api
 
 local M = {}
 
@@ -88,11 +90,12 @@ end
 
 -- Open monolithic buffer in current window
 function M.open()
-  local v = view.new(M._view_opts)
+  local v = view.new(M._view_opts, explore.get_name())
   local files = explore.cwd(M._ext_map)
 
   v:add_files(files)
   v:set_as_current_buf()
+  v:set_extmarks()
   v:enable_syntax_highlighting()
   v:create_folds()
   if hide_line_numbering then
@@ -103,6 +106,7 @@ function M.open()
   M._views[v._buffer] = v
 
   history.add(vim.fn.getcwd())
+  v:setup_writer()
 end
 
 function M._get_view(bufnr)
@@ -112,6 +116,34 @@ end
 function M.jump_edit()
   local v = M._get_view(vim.api.nvim_get_current_buf())
   action.jump_to_file(v)
+end
+
+function M.save_all(buf)
+  local v = M._views[buf]
+  local lines = api.nvim_buf_get_lines(buf, 0, -1, true)
+  local modified = {}
+  if v then
+    for i=1,#v._filenames do
+      local filename = v._filenames[i]
+      local startext, endext = unpack(v._extmarks[i])
+
+      local startlnum, _ = unpack(api.nvim_buf_get_extmark_by_id(buf, v._ns_id, startext, {}))
+      local endlnum, _ = unpack(api.nvim_buf_get_extmark_by_id(buf, v._ns_id, endext, {}))
+
+      if writer.has_changed(filename, lines, startlnum, endlnum) then
+        local count = writer.write(filename, lines, startlnum, endlnum)
+        table.insert(modified, {
+          filename = vim.fn.fnamemodify(filename, ":."),
+          lines = endlnum - startlnum,
+          character = count,
+        })
+      end
+    end
+  end
+  vim.bo.modified = false
+  for _, m in ipairs(modified) do
+    print("\"" .. m.filename .. "\" " .. m.lines .. "L, " .. m.character .. "C written")
+  end
 end
 
 return M

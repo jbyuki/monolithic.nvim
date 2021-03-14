@@ -40,20 +40,18 @@ function highlight.create_treesitter_highlighter(buf, lang, regions)
   ts.highlighter.new(parser, {})
 end
 
-function highlight.highlight_with_treesitter(buf, langs, regions)
+function highlight.highlight_with_treesitter(buf, langs, regions, ns_id, extmarks)
   assert(#langs == #regions)
 
   -- might be a good idea to cleanup everything related
   -- to treesitter first
 
   local regions_by_lang = utils.group_by_key(langs, regions)
-  local ns_id = vim.api.nvim_create_namespace("")
-  local extmarks = {}
+  local extmarks_by_lang = utils.group_by_key(langs, extmarks)
   for lang, region in pairs(regions_by_lang) do
     highlight.create_treesitter_highlighter(buf, lang, region)
-    extmarks[lang] = highlight.add_extmarks(buf, ns_id, region)
   end
-  highlight.attach_buf(buf, ns_id, extmarks)
+  highlight.attach_buf(buf, ns_id, extmarks_by_lang)
 end
 
 function highlight.highlight_with_vim(buf, langs, regions)
@@ -86,19 +84,6 @@ function highlight.highlight_headers(buf, lnums, hl_group)
   for _, lnum in ipairs(lnums) do
     vim.api.nvim_buf_add_highlight(buf, 0, hl_group, lnum, 0, -1)
   end
-end
-
-function highlight.add_extmarks(buf, ns_id, regions)
-  local extmarks = {}
-  for _, region in ipairs(regions) do
-    local startlnum, endlnum = unpack(region)
-    local startext = vim.api.nvim_buf_set_extmark(
-      buf, ns_id, startlnum, 0, {virt_text = {{ "start", "Special" }}})
-    local endext = vim.api.nvim_buf_set_extmark(
-      buf, ns_id, endlnum, 0, {virt_text = {{ "end", "Special" }}})
-    table.insert(extmarks, {startext, endext})
-  end
-  return extmarks
 end
 
 function highlight.attach_buf(buf, ns_id, extmarks)

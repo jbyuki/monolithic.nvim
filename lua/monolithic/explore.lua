@@ -2,6 +2,7 @@ local ft = require "monolithic.filetype"
 local explorer = {}
 local fn = vim.fn
 
+
 function explorer.glob_cwd()
   local path_str = fn.glob("**/*")
   local paths = vim.split(path_str, "\n")
@@ -29,6 +30,11 @@ function explorer.cwd(ext_map)
   local paths = explorer.glob_cwd()
   local valid_files = explorer.filter(paths, ext_map)
   return valid_files
+end
+
+function explorer.get_name()
+  local name = vim.fn.getcwd()
+  return vim.fn.fnamemodify(name, ":t")
 end
 
 return explorer

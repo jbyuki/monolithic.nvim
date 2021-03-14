@@ -1,12 +1,12 @@
 local api = vim.api
 local ft = require "monolithic.filetype"
 local hl = require "monolithic.highlight"
+local writer = require "monolithic.writer"
 local view = {}
 
 -- create an empty view with its buffer
-function view.new(opts)
+function view.new(opts, name)
   local new_view = {
-    _buffer = api.nvim_create_buf(false, true),
     _header_pre = opts.header_pre or "-- ",
     _header_post = opts.header_pre or " -------------------------------------------",
     _header_hl_group = opts.header_hl_group or "Title",
@@ -15,9 +15,20 @@ function view.new(opts)
     _langs = {},
     _langs_set = {},
     _lnum = 0,
+    _name = name,
     _header_lnums = {},
-    _keymap_edit = opts.keymap_edit or "<tab>"
+    _keymap_edit = opts.keymap_edit or "<tab>",
+    _ns_id = api.nvim_create_namespace(""),
+    _extmarks = {},
   }
+
+  local buf = vim.fn.bufnr(name)
+  if buf ~= -1 then
+    api.nvim_command("bw " .. buf)
+  end
+
+  new_view._buffer = api.nvim_create_buf(false, true)
+  api.nvim_buf_set_name(new_view._buffer, name)
 
   return setmetatable(new_view, {
     __index = view
@@ -69,7 +80,7 @@ function view:enable_syntax_highlighting()
   hl.highlight_headers(self._buffer, self._header_lnums, self._header_hl_group)
 
   if hl.is_treesitter_supported(self._buffer, self._langs) then
-    hl.highlight_with_treesitter(self._buffer, self._langs, self._regions)
+    hl.highlight_with_treesitter(self._buffer, self._langs, self._regions,self._ns_id, self._extmarks)
   else
     hl.highlight_with_vim(self._buffer, self._langs, self._regions)
   end
@@ -89,6 +100,10 @@ end
 -- display view in current window
 function view:set_as_current_buf()
   api.nvim_set_current_buf(self._buffer)
+  if self._rename then
+    api.nvim_command("file " .. self._name)
+    self._rename = true
+  end
 end
 
 function view:show_in_vsplit()
@@ -133,7 +148,25 @@ end
 
 function view:attach_actions()
   if self._keymap_edit then
-    vim.api.nvim_buf_set_keymap(self._buffer, 'n', self._keymap_edit, [[<cmd>lua require"monolithic".jump_edit()<CR>]], { noremap = true })
+    api.nvim_buf_set_keymap(self._buffer, 'n', self._keymap_edit, [[<cmd>lua require"monolithic".jump_edit()<CR>]], { noremap = true })
+  end
+end
+
+function view:setup_writer()
+  writer.set_buftype(self._buffer)
+  writer.set_bufwritecmds(self._buffer)
+  vim.bo.modified = false
+end
+
+function view:set_extmarks()
+  for _, region in ipairs(self._regions) do
+    local startnum, endnum = unpack(region)
+    table.insert(self._extmarks, {
+      api.nvim_buf_set_extmark(
+        self._buffer, self._ns_id, startnum, 0, {}),
+      api.nvim_buf_set_extmark(
+        self._buffer, self._ns_id, endnum, 0, {})
+    })
   end
 end
 
