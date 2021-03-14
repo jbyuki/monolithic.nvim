@@ -89,7 +89,7 @@ end
 function highlight.attach_buf(buf, ns_id, extmarks)
   vim.api.nvim_buf_attach(buf, false, {
     on_lines = function(_, _, _, _, lastline, new_lastline, _)
-      if lastline ~= new_lastline then
+      -- if lastline ~= new_lastline then
         vim.schedule(function()
           for lang, extmark in pairs(extmarks) do
             local parser = ts.get_parser(buf, lang)
@@ -97,11 +97,9 @@ function highlight.attach_buf(buf, ns_id, extmarks)
 
             local ts_regions = highlight.transform_to_treesitter_regions(new_regions)
             parser:set_included_regions(ts_regions)
-            parser:invalidate()
-            parser:parse()
           end
         end)
-      end
+      -- end
     end })
 end
 

@@ -2,6 +2,7 @@ local utils = {}
 
 function utils.make_set_from_keys(list)
   local set = {}
+  local set = {}
   for _,k in ipairs(list) do
     set[k] = true
   end
