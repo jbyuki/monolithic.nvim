@@ -65,7 +65,7 @@ Note: See `:lua print(vim.inspect(require"monolithic"._ext_map))` for the defaul
 
 ## Features to explore
 
-* [ ] Read/Write
+* [x] Read/Write
 * [ ] LSP support
 * [ ] Show filename in status line or external floats
 * [ ] Add/Remove files to buffer
