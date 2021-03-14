@@ -47,9 +47,13 @@ function highlight.highlight_with_treesitter(buf, langs, regions)
   -- to treesitter first
 
   local regions_by_lang = utils.group_by_key(langs, regions)
+  local ns_id = vim.api.nvim_create_namespace("")
+  local extmarks = {}
   for lang, region in pairs(regions_by_lang) do
     highlight.create_treesitter_highlighter(buf, lang, region)
+    extmarks[lang] = highlight.add_extmarks(buf, ns_id, region)
   end
+  highlight.attach_buf(buf, ns_id, extmarks)
 end
 
 function highlight.highlight_with_vim(buf, langs, regions)
@@ -82,6 +86,49 @@ function highlight.highlight_headers(buf, lnums, hl_group)
   for _, lnum in ipairs(lnums) do
     vim.api.nvim_buf_add_highlight(buf, 0, hl_group, lnum, 0, -1)
   end
+end
+
+function highlight.add_extmarks(buf, ns_id, regions)
+  local extmarks = {}
+  for _, region in ipairs(regions) do
+    local startlnum, endlnum = unpack(region)
+    local startext = vim.api.nvim_buf_set_extmark(
+      buf, ns_id, startlnum, 0, {virt_text = {{ "start", "Special" }}})
+    local endext = vim.api.nvim_buf_set_extmark(
+      buf, ns_id, endlnum, 0, {virt_text = {{ "end", "Special" }}})
+    table.insert(extmarks, {startext, endext})
+  end
+  return extmarks
+end
+
+function highlight.attach_buf(buf, ns_id, extmarks)
+  vim.api.nvim_buf_attach(buf, false, {
+    on_lines = function(_, _, _, _, lastline, new_lastline, _)
+      if lastline ~= new_lastline then
+        vim.schedule(function()
+          for lang, extmark in pairs(extmarks) do
+            local parser = ts.get_parser(buf, lang)
+            local new_regions = highlight.get_extmark_positions(buf, ns_id, extmark)
+
+            local ts_regions = highlight.transform_to_treesitter_regions(new_regions)
+            parser:set_included_regions(ts_regions)
+            parser:invalidate()
+            parser:parse()
+          end
+        end)
+      end
+    end })
+end
+
+function highlight.get_extmark_positions(buf, ns_id, extmarks)
+  local new_regions = {}
+  for _, mark in ipairs(extmarks) do
+    local startext, endext = unpack(mark)
+    local startlnum, _ = unpack(vim.api.nvim_buf_get_extmark_by_id(buf, ns_id, startext, {}))
+    local endlnum, _ = unpack(vim.api.nvim_buf_get_extmark_by_id(buf, ns_id, endext, {}))
+    table.insert(new_regions, {startlnum, endlnum})
+  end
+  return new_regions
 end
 
 return highlight
