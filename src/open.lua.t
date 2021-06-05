@@ -120,7 +120,7 @@ end
 local ft = vim.api.nvim_buf_get_option(0, "ft")
 
 @set_window_filetype+=
-vim.api.nvim_buf_set_option(0, "ft", ft)
+-- vim.api.nvim_buf_set_option(0, "ft", ft)
 
 @setup_folds+=
 for i = 1,#titles_pos do

@@ -79,7 +79,7 @@ function M.open()
     border = "single",
   })
   
-  vim.api.nvim_buf_set_option(0, "ft", ft)
+  -- vim.api.nvim_buf_set_option(0, "ft", ft)
   
   local ns_id = vim.api.nvim_create_namespace("")
   for _, pos in ipairs(titles_pos) do

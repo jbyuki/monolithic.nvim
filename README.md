@@ -2,6 +2,8 @@
 
 **After using this plugin somewhat regularly, I came to the conlusion that this plug-in should be repurposed to be used with a floating window. Opening directly inside a buffer gives the wrong impression that the files should directly be editable. But in fact, monolithic.nvim is just for code reading and navigation. If you want to use the previous version, please revert back to the comit** [bb5f500](https://github.com/jbyuki/monolithic.nvim/commit/bb5f500047383abb4f5025d444ce48cba82b688e). See [Why opening inside a buffer was abandonned?](#why-opening-inside-a-buffer-was-abandonned) for more details.
 
+[![Capture.png](https://i.postimg.cc/Xq5ML6Wh/Capture.png)](https://postimg.cc/QKjnNPHk)
+
 [monolithic.nvim]() allows you to open multiple files inside a float. It is an experimental plugin to explore code reading.
 
 ## Requirements
