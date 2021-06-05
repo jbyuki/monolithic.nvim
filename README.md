@@ -24,7 +24,7 @@ Plug 'jbyuki/monolithic.vim'
 Bind `monolithic.nvim` to a key shortcut. Use whichever key combination which suits you best.
 
 ```vim
-nnoremap <leader>s require"monolithic".open()
+nnoremap <leader>s :lua require"monolithic".open()<CR>
 ```
 
 ## Configurations
