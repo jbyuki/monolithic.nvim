@@ -58,6 +58,9 @@ function M.open()
   end
   
 
+  local curfn = vim.fn.expand("%")
+  local currow, _ = unpack(vim.api.nvim_win_get_cursor(0))
+  
   local ft = vim.api.nvim_buf_get_option(0, "ft")
   
   local width = vim.o.columns
@@ -107,6 +110,19 @@ function M.open()
   
   vim.api.nvim_command("autocmd WinLeave * ++once lua vim.api.nvim_win_close(" .. win .. ", false)")
   
+  local cur
+  for i=1,#titles do
+    if titles[i] == curfn then
+      cur = i
+      break
+    end
+  end
+  
+  if cur then
+    local lnum = titles_pos[cur] + currow + 1
+    vim.api.nvim_win_set_cursor(0, { lnum, 0 })
+    vim.api.nvim_command("normal zo")
+  end
 end
 
 function M.do_mapping(id)
@@ -140,6 +156,7 @@ function M.navigate()
   
   local lnum = row - titles_pos[selected]
   vim.api.nvim_win_set_cursor(0, {lnum - 1, 0})
+  
 end
 
 function M.setup(opts)

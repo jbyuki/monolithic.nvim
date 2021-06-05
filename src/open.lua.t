@@ -9,6 +9,7 @@ function M.open()
   @create_scratch_buffer
   @append_all_files_to_buffer
 
+  @get_filename_and_line_of_current
   @get_file_filetype
   @create_float_window
   @set_window_filetype
@@ -16,6 +17,7 @@ function M.open()
   @setup_folds
   @setup_mappings
   @close_float_on_leave
+  @goto_filename_and_line_of_current
 end
 
 @glob_all_files_in_cwd+=
@@ -201,3 +203,22 @@ end
 @goto_line_in_jump_file+=
 local lnum = row - titles_pos[selected]
 vim.api.nvim_win_set_cursor(0, {lnum - 1, 0})
+
+@get_filename_and_line_of_current+=
+local curfn = vim.fn.expand("%")
+local currow, _ = unpack(vim.api.nvim_win_get_cursor(0))
+
+@goto_filename_and_line_of_current+=
+local cur
+for i=1,#titles do
+  if titles[i] == curfn then
+    cur = i
+    break
+  end
+end
+
+if cur then
+  local lnum = titles_pos[cur] + currow + 1
+  vim.api.nvim_win_set_cursor(0, { lnum, 0 })
+  vim.api.nvim_command("normal zo")
+end
