@@ -19,6 +19,33 @@ Add this to your plug-in list:
 Plug 'jbyuki/monolithic.vim'
 ```
 
+## Quick start
+
+Bind `monolithic.nvim` to a key shortcut. Use whichever key combination which suits you best.
+
+```vim
+nnoremap <leader>s require"monolithic".open()
+```
+
+## Configurations
+
+Further configurations can be done through `setup()`.  Add the following to your Neovim configuration file.
+
+```lua
+lua << EOF
+require"monolithic".setup {
+  excluded_pat = { ".git/**/*" }, -- You can specify files patterns which will 
+                                  -- not be displayed inside the monolithic float
+  mappings = {
+    ["<leader>s"] = require"monolithic".navigate, -- used whenever you want to jump back to the file from monolithic
+  }
+
+  perc_width = 0.8, -- Editor width fraction which will be used by the monolithic float
+  perc_height = 0.8, -- Same with height
+}
+EOF
+```
+
 ## But why?
 
 With current programming methodologies, source code is often split up into multiple small modules. When you read the source code for the first time, it's often a pain to navigate between the files without the proper tools.
