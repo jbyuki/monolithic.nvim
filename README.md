@@ -1,13 +1,13 @@
 # monolithic.nvim
 
-[monolithic.nvim]() allows you to open multiple files in one buffer. It is an experimental plugin to explore code reading.
+**After using this plugin somewhat regularly, I came to the conlusion that this plug-in should be repurposed to be used with a floating window. Opening directly inside a buffer gives the wrong impression that the files should directly be editable. But in fact, monolithic.nvim is just for code reading and navigation. If you want to use the previous version, please revert back to the comit bb5f500047383abb4f5025d444ce48cba82b688e .**
 
-[![Capture.png](https://i.postimg.cc/3wvmhBLN/Capture.png)](https://postimg.cc/8FTjBhgg)
+[monolithic.nvim]() allows you to open multiple files inside a float. It is an experimental plugin to explore code reading.
 
 ## Requirements
 
 * Neovim 0.5
-* [nvim-treesitter](https://github.com/nvim-treesitter/nvim-treesitter) for correct embedded syntax highlighting (optional but recommended)
+* [nvim-treesitter](https://github.com/nvim-treesitter/nvim-treesitter) 
 
 ## Install
 
@@ -18,61 +18,6 @@ Add this to your plug-in list:
 ```vim
 Plug 'jbyuki/monolithic.vim'
 ```
-
-
-
-## Get started
-
-Add the following to your `init.vim`:
-
-```vim
-command OpenAll lua require"monolithic".open()
-```
-
-## Basic usage
-
-1. Change the working directory to your project's directory using `:cd`.
-2. Invoke **monolithic** using `:OpenAll` or `:lua require"monolithic".open()`.
-
-## Configuration
-
-#### Add additionnal filetypes
-
-`init.vim`
-```lua
-lua << END
-require"monolithic".setup {
-	-- add additionnal extensions to be deteted for syntax highlighting
-	-- existing defaults can also be replaced
-	ext_map = { 
-		"md" = "markdown"
-	},
-
-	-- highlight group for header with filename
-	header_hl_group = "Title",
-
-	-- header styling
-	header_pre = "## ",  
-	header_post = " #####",
-
-	-- line numbering is disabled by default
-	hide_line_numbering = false,
-}
-END
-```
-
-Note: See `:lua print(vim.inspect(require"monolithic"._ext_map))` for the default configuration.
-
-## Features to explore
-
-* [x] Read/Write
-* [ ] LSP support
-* [ ] Show filename in status line or external floats
-* [ ] Add/Remove files to buffer
-* [ ] Create new file within buffer
-* [ ] Reorder files
-* [ ] Open multi-file buffer from MRU
-* [ ] Jump to file from buffer
 
 ## But why?
 
