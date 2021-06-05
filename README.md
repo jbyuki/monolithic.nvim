@@ -29,6 +29,10 @@ Bind `monolithic.nvim` to a key shortcut. Use whichever key combination which su
 nnoremap <leader>s :lua require"monolithic".open()<CR>
 ```
 
+1. Open a file in your project.
+2. Change the current working directory to your project using `:cd` or any other method.
+3. Open with monolithic.
+
 ## Configurations
 
 Further configurations can be done through `setup()`.  Add the following to your Neovim configuration file.
