@@ -69,6 +69,8 @@ function M.open()
   local win_width = math.floor(width * perc_width)
   local win_height = math.floor(height * perc_height)
   
+  print(win_width, win_height)
+  
   win = vim.api.nvim_open_win(buf, true, {
     relative = "editor",
     width = win_width,
@@ -108,6 +110,26 @@ function M.open()
     mapping_id = mapping_id + 1
   end
   
+  local has_highlighter = false
+  if not has_highlighter then
+    local has_ts = pcall(require, 'nvim-treesitter')
+    if has_ts then
+      local ts_highlight = require'nvim-treesitter.highlight'
+      local ts_parsers = require'nvim-treesitter.parsers'
+      
+      local lang = ts_parsers.ft_to_lang(ft)
+      if ts_parsers.has_parser(lang) then
+        ts_highlight.attach(buf, lang)
+        has_highlighter = true
+      end
+    end
+    
+  end
+  
+  if not has_highlighter then
+    vim.api.nvim_buf_set_option(buf, "syntax", ft)
+  end
+  
   vim.api.nvim_command("autocmd WinLeave * ++once lua vim.api.nvim_win_close(" .. win .. ", false)")
   
   local cur
@@ -123,6 +145,7 @@ function M.open()
     vim.api.nvim_win_set_cursor(0, { lnum, 0 })
     vim.api.nvim_command("normal zo")
   end
+  
 end
 
 function M.do_mapping(id)

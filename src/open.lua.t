@@ -16,6 +16,7 @@ function M.open()
   @set_highlights_titles
   @setup_folds
   @setup_mappings
+  @setup_highlighter
   @close_float_on_leave
   @goto_filename_and_line_of_current
 end
@@ -95,6 +96,8 @@ local height = vim.o.lines
 
 local win_width = math.floor(width * perc_width)
 local win_height = math.floor(height * perc_height)
+
+print(win_width, win_height)
 
 win = vim.api.nvim_open_win(buf, true, {
   relative = "editor",
@@ -222,3 +225,29 @@ if cur then
   vim.api.nvim_win_set_cursor(0, { lnum, 0 })
   vim.api.nvim_command("normal zo")
 end
+
+@setup_highlighter+=
+local has_highlighter = false
+if not has_highlighter then
+  @setup_treesitter_highlighter
+end
+
+if not has_highlighter then
+  @setup_regex_highlighter
+end
+
+@setup_treesitter_highlighter+=
+local has_ts = pcall(require, 'nvim-treesitter')
+if has_ts then
+  local ts_highlight = require'nvim-treesitter.highlight'
+  local ts_parsers = require'nvim-treesitter.parsers'
+  
+  local lang = ts_parsers.ft_to_lang(ft)
+  if ts_parsers.has_parser(lang) then
+    ts_highlight.attach(buf, lang)
+    has_highlighter = true
+  end
+end
+
+@setup_regex_highlighter+=
+vim.api.nvim_buf_set_option(buf, "syntax", ft)
