@@ -97,8 +97,6 @@ local height = vim.o.lines
 local win_width = math.floor(width * perc_width)
 local win_height = math.floor(height * perc_height)
 
-print(win_width, win_height)
-
 win = vim.api.nvim_open_win(buf, true, {
   relative = "editor",
   width = win_width,
