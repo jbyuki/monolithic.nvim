@@ -18,7 +18,7 @@ The easiest method is install through plugin manager such as [vim-plug](https://
 Add this to your plug-in list:
 
 ```vim
-Plug 'jbyuki/monolithic.vim'
+Plug 'jbyuki/monolithic.nvim'
 ```
 
 ## Quick start
