@@ -1,5 +1,7 @@
 -- Generated using ntangle.nvim
 local M = {}
+local search_patterns = { "**/*" }
+
 local excluded_patterns = {}
 
 local titles_pos = {}
@@ -13,8 +15,22 @@ local mappings = {}
 
 local mappings_lookup = {}
 
+local max_files = -1
+
 function M.open()
-  local files = vim.split(vim.fn.glob("**/*"), "\n")
+  local files_dict = {}
+  for _, pat in ipairs(search_patterns) do
+    local ex = vim.split(vim.fn.glob(pat), "\n")
+    for _, f in ipairs(ex) do
+      files_dict[f] = true
+    end
+
+  end
+
+  local files = {}
+  for file, _ in pairs(files_dict) do
+    table.insert(files, file)
+  end
 
   local excluded = {}
   for _, pat in ipairs(excluded_patterns) do
@@ -28,6 +44,10 @@ function M.open()
   files = vim.tbl_filter(function(x) return not excluded[x] end, files)
 
   files = vim.tbl_filter(function(x) return vim.fn.isdirectory(x) == 0 end, files)
+
+  if max_files ~= -1 then
+    assert(#files < max_files)
+  end
 
   
   local buf = vim.api.nvim_create_buf(false, true)
@@ -126,6 +146,7 @@ function M.open()
 
   if not has_highlighter then
     vim.api.nvim_buf_set_option(buf, "syntax", ft)
+
   end
 
   vim.api.nvim_command("autocmd WinLeave * ++once lua vim.api.nvim_win_close(" .. win .. ", false)")
@@ -191,6 +212,14 @@ function M.setup(opts)
     ["opts.perc_width"] = { opts.perc_width, 'n', true },
     ["opts.perc_height"] = { opts.perc_height, 'n', true },
   }
+
+  if opts.search_pat then
+    search_patterns = opts.search_pat
+  end
+
+  if opts.max_files then
+    max_files = opts.max_files
+  end
 
   if opts.mappings then
     mappings = opts.mappings

@@ -5,6 +5,7 @@ function M.open()
   @glob_excluded_files
   @filter_excluded_files
   @filter_directories
+  @check_max_files_limit
   
   @create_scratch_buffer
   @append_all_files_to_buffer
@@ -21,8 +22,30 @@ function M.open()
   @goto_filename_and_line_of_current
 end
 
+@script_variables+=
+local search_patterns = { "**/*" }
+
+@set_options+=
+if opts.search_pat then
+  search_patterns = opts.search_pat
+end
+
 @glob_all_files_in_cwd+=
-local files = vim.split(vim.fn.glob("**/*"), "\n")
+local files_dict = {}
+for _, pat in ipairs(search_patterns) do
+  local ex = vim.split(vim.fn.glob(pat), "\n")
+  @append_files_to_files_set
+end
+
+local files = {}
+for file, _ in pairs(files_dict) do
+  table.insert(files, file)
+end
+
+@append_files_to_files_set+=
+for _, f in ipairs(ex) do
+  files_dict[f] = true
+end
 
 @script_variables+=
 local excluded_patterns = {}
@@ -249,3 +272,17 @@ end
 
 @setup_regex_highlighter+=
 vim.api.nvim_buf_set_option(buf, "syntax", ft)
+
+@script_variables+=
+local max_files = -1
+
+@set_options+=
+if opts.max_files then
+  max_files = opts.max_files
+end
+
+@check_max_files_limit+=
+if max_files ~= -1 then
+  assert(#files < max_files)
+end
+
