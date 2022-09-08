@@ -40,6 +40,9 @@ Further configurations can be done through `setup()`.  Add the following to your
 ```lua
 lua << EOF
 require"monolithic".setup {
+
+  search_pat = { "**/*.lua",  "**/*.py" }, -- You can specify files patterns which will 
+                                  -- be displayed inside the monolithic float
   excluded_pat = { ".git/**/*" }, -- You can specify files patterns which will 
                                   -- not be displayed inside the monolithic float
   mappings = {
@@ -48,6 +51,7 @@ require"monolithic".setup {
 
   perc_width = 0.8, -- Editor width fraction which will be used by the monolithic float
   perc_height = 0.8, -- Same with height
+  max_file = 100, -- Maximum number of files that can be opened in the buffer
 }
 EOF
 ```
