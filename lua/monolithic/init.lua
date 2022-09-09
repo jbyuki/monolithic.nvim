@@ -15,7 +15,7 @@ local mappings = {}
 
 local mappings_lookup = {}
 
-local max_files = -1
+local max_files = 20
 
 function M.open()
   local files_dict = {}
@@ -46,8 +46,10 @@ function M.open()
   files = vim.tbl_filter(function(x) return vim.fn.isdirectory(x) == 0 end, files)
 
   if max_files ~= -1 then
-    vim.api.nvim_echo({{"ERROR(monolithic.nvim): Too many files! (configure with max_files)", "ErrorMsg"}}, true, {})
-    return
+    if max_files > #files then
+      vim.api.nvim_echo({{("ERROR(monolithic.nvim): Too many files! Found %d. Configure limit with max_files settings"):format(#files), "ErrorMsg"}}, true, {})
+      return
+    end
   end
 
   

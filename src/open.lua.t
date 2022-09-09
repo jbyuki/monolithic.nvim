@@ -274,7 +274,7 @@ end
 vim.api.nvim_buf_set_option(buf, "syntax", ft)
 
 @script_variables+=
-local max_files = -1
+local max_files = 20
 
 @set_options+=
 if opts.max_files then
@@ -283,7 +283,9 @@ end
 
 @check_max_files_limit+=
 if max_files ~= -1 then
-  vim.api.nvim_echo({{"ERROR(monolithic.nvim): Too many files! (configure with max_files)", "ErrorMsg"}}, true, {})
-  return
+  if max_files > #files then
+    vim.api.nvim_echo({{("ERROR(monolithic.nvim): Too many files! Found %d. Configure limit with max_files settings"):format(#files), "ErrorMsg"}}, true, {})
+    return
+  end
 end
 
