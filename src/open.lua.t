@@ -283,6 +283,7 @@ end
 
 @check_max_files_limit+=
 if max_files ~= -1 then
-  assert(#files < max_files)
+  vim.api.nvim_echo({{"ERROR(monolithic.nvim): Too many files! (configure with max_files)", "ErrorMsg"}}, true, {})
+  return
 end
 

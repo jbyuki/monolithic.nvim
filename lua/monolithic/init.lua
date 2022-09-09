@@ -46,7 +46,8 @@ function M.open()
   files = vim.tbl_filter(function(x) return vim.fn.isdirectory(x) == 0 end, files)
 
   if max_files ~= -1 then
-    assert(#files < max_files)
+    vim.api.nvim_echo({{"ERROR(monolithic.nvim): Too many files! (configure with max_files)", "ErrorMsg"}}, true, {})
+    return
   end
 
   
