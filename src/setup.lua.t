@@ -2,23 +2,19 @@
 @implement+=
 function M.setup(opts)
   opts = opts or {}
+  -- @deprecation_warnings
   @validate_setup_options
   @set_options
 end
 
 @validate_setup_options+=
 vim.validate {
-  ["opts.excluded_pat"] = { opts.excluded_pat, 't', true },
   ["opts.mappings"] = { opts.mappings, 't', true },
 }
 
 @set_options+=
 if opts.mappings then
   mappings = opts.mappings
-end
-
-if opts.excluded_pat then
-  excluded_patterns = opts.excluded_pat
 end
 
 @validate_setup_options+=
@@ -34,4 +30,55 @@ end
 
 if opts.perc_height then
   perc_height = opts.perc_height
+end
+
+@deprecation_warnings+=
+if opts.search_pat then
+  vim.api.nvim_echo({{"search_pat is deprecated. See README.md", "ErrorMsg"}}, true, {})
+end
+
+if opts.excluded_pat then
+  vim.api.nvim_echo({{"(monolithic.nvim): excluded_pat is deprecated. See README.md", "ErrorMsg"}}, true, {})
+end
+
+@validate_setup_options+=
+vim.validate {
+  ["opts.valid_ext"] = { opts.valid_ext, 't', true },
+}
+
+@script_variables+=
+local valid_ext = {
+  ["lua"] = true,
+  ["py"] = true,
+  ["cpp"] = true,
+  ["c"] = true,
+  ["h"] = true,
+  ["hpp"] = true,
+}
+
+@set_options+=
+if opts.valid_ext then
+  valid_ext = {}
+  for _, v in ipairs(opts.valid_ext) do
+    valid_ext[v] = true
+  end
+end
+
+@script_variables+=
+local exclude_dirs = {
+  [".git"] = true,
+  ["__pycache__"] = true,
+}
+
+@validate_setup_options+=
+vim.validate {
+  ["opts.exclude_dirs"] = { opts.exclude_dirs, 't', true },
+}
+
+@set_options+=
+if opts.exclude_dirs then
+  exclude_dirs = {}
+  for _, v in ipairs(opts.exclude_dirs) do
+    exclude_dirs[v] = true
+  end
 end

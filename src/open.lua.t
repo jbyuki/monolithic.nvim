@@ -2,13 +2,12 @@
 @implement+=
 function M.open()
   @glob_all_files_in_cwd
-  @glob_excluded_files
-  @filter_excluded_files
-  @filter_directories
   @check_max_files_limit
   
   @create_scratch_buffer
+
   @append_all_files_to_buffer
+  @stop_timer_2
 
   @get_filename_and_line_of_current
   @get_file_filetype
@@ -23,50 +22,62 @@ function M.open()
 end
 
 @script_variables+=
-local search_patterns = { "**/*" }
+local open_dir
 
-@set_options+=
-if opts.search_pat then
-  search_patterns = opts.search_pat
-end
+@implement+=
+function open_dir(path, files)
+  @check_that_files_is_below_maximum
+  local dir = vim.loop.fs_opendir(path, nil, 50)
+  if dir then
+    while true do
+      local entries = dir:readdir()
+      if not entries then
+        break
+      end
 
-@glob_all_files_in_cwd+=
-local files_dict = {}
-for _, pat in ipairs(search_patterns) do
-  local ex = vim.split(vim.fn.glob(pat), "\n")
-  @append_files_to_files_set
-end
+      @check_that_files_is_below_maximum
 
-local files = {}
-for file, _ in pairs(files_dict) do
-  table.insert(files, file)
-end
-
-@append_files_to_files_set+=
-for _, f in ipairs(ex) do
-  files_dict[f] = true
+      for _, entry in ipairs(entries) do
+        if entry["type"] == "directory" then
+          local dir_name = entry["name"]
+          if not exclude_dirs[dir_name] then
+            open_dir(path .. "/" .. dir_name, files)
+          end
+        else
+          table.insert(files, path .. "/" .. entry["name"])
+        end
+      end
+    end
+    dir:closedir()
+  end
 end
 
 @script_variables+=
-local excluded_patterns = {}
+local max_search = 10000
 
-@glob_excluded_files+=
-local excluded = {}
-for _, pat in ipairs(excluded_patterns) do
-  local ex = vim.split(vim.fn.glob(pat), "\n")
-  @append_files_to_excluded_set
+@set_options+=
+if opts.max_search then
+  max_search = opts.max_search
 end
 
-@append_files_to_excluded_set+=
-for _, f in ipairs(ex) do
-  excluded[f] = true
+@check_that_files_is_below_maximum+=
+if #files > max_search then
+  return
 end
 
-@filter_excluded_files+=
-files = vim.tbl_filter(function(x) return not excluded[x] end, files)
+@glob_all_files_in_cwd+=
+local files = {}
+open_dir(".", files)
 
-@filter_directories+=
-files = vim.tbl_filter(function(x) return vim.fn.isdirectory(x) == 0 end, files)
+if #files > max_search then
+  vim.api.nvim_echo({{("ERROR(monolithic.nvim): Too many files searched (limit at %d)! Found %d. Configure limit with max_search settings"):format(max_search, #files), "ErrorMsg"}}, true, {})
+  return
+end
+
+files = vim.tbl_filter(function(fn) 
+  local ext = fn:match("%.([^.]*)$")
+  return valid_ext[ext] end, 
+files)
 
 @create_scratch_buffer+=
 local buf = vim.api.nvim_create_buf(false, true)
@@ -79,9 +90,11 @@ for _, fn in ipairs(files) do
 end
 
 @load_file_content+=
+local f = io.open(fn)
 local lines = {}
-for line in io.lines(fn) do
-  table.insert(lines, line)
+if f then
+  local content = f:read("*a")
+  lines = vim.split(content, "\n")
 end
 
 @script_variables+=
@@ -274,7 +287,7 @@ end
 vim.api.nvim_buf_set_option(buf, "syntax", ft)
 
 @script_variables+=
-local max_files = 20
+local max_files = 100
 
 @set_options+=
 if opts.max_files then
@@ -282,10 +295,7 @@ if opts.max_files then
 end
 
 @check_max_files_limit+=
-if max_files ~= -1 then
-  if #files > max_files then
-    vim.api.nvim_echo({{("ERROR(monolithic.nvim): Too many files! Found %d. Configure limit with max_files settings"):format(#files), "ErrorMsg"}}, true, {})
-    return
-  end
+if #files > max_files then
+  vim.api.nvim_echo({{("ERROR(monolithic.nvim): Too many files (limit at %d)! Found %d. Configure limit with max_files settings"):format(max_files, #files), "ErrorMsg"}}, true, {})
+  return
 end
-

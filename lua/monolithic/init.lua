@@ -1,8 +1,8 @@
 -- Generated using ntangle.nvim
 local M = {}
-local search_patterns = { "**/*" }
+local open_dir
 
-local excluded_patterns = {}
+local max_search = 10000
 
 local titles_pos = {}
 local titles = {}
@@ -15,53 +15,53 @@ local mappings = {}
 
 local mappings_lookup = {}
 
-local max_files = 20
+local max_files = 100
+
+local valid_ext = {
+  ["lua"] = true,
+  ["py"] = true,
+  ["cpp"] = true,
+  ["c"] = true,
+  ["h"] = true,
+  ["hpp"] = true,
+}
+
+local exclude_dirs = {
+  [".git"] = true,
+  ["__pycache__"] = true,
+}
 
 function M.open()
-  local files_dict = {}
-  for _, pat in ipairs(search_patterns) do
-    local ex = vim.split(vim.fn.glob(pat), "\n")
-    for _, f in ipairs(ex) do
-      files_dict[f] = true
-    end
-
-  end
-
   local files = {}
-  for file, _ in pairs(files_dict) do
-    table.insert(files, file)
+  open_dir(".", files)
+
+  if #files > max_search then
+    vim.api.nvim_echo({{("ERROR(monolithic.nvim): Too many files searched (limit at %d)! Found %d. Configure limit with max_search settings"):format(max_search, #files), "ErrorMsg"}}, true, {})
+    return
   end
 
-  local excluded = {}
-  for _, pat in ipairs(excluded_patterns) do
-    local ex = vim.split(vim.fn.glob(pat), "\n")
-    for _, f in ipairs(ex) do
-      excluded[f] = true
-    end
+  files = vim.tbl_filter(function(fn) 
+    local ext = fn:match("%.([^.]*)$")
+    return valid_ext[ext] end, 
+  files)
 
+  if #files > max_files then
+    vim.api.nvim_echo({{("ERROR(monolithic.nvim): Too many files (limit at %d)! Found %d. Configure limit with max_files settings"):format(max_files, #files), "ErrorMsg"}}, true, {})
+    return
   end
-
-  files = vim.tbl_filter(function(x) return not excluded[x] end, files)
-
-  files = vim.tbl_filter(function(x) return vim.fn.isdirectory(x) == 0 end, files)
-
-  if max_files ~= -1 then
-    if #files > max_files then
-      vim.api.nvim_echo({{("ERROR(monolithic.nvim): Too many files! Found %d. Configure limit with max_files settings"):format(#files), "ErrorMsg"}}, true, {})
-      return
-    end
-  end
-
   
   local buf = vim.api.nvim_create_buf(false, true)
+
 
   titles_pos = {}
   titles = {}
 
   for _, fn in ipairs(files) do
+    local f = io.open(fn)
     local lines = {}
-    for line in io.lines(fn) do
-      table.insert(lines, line)
+    if f then
+      local content = f:read("*a")
+      lines = vim.split(content, "\n")
     end
 
     local lcount = vim.api.nvim_buf_line_count(buf)
@@ -170,6 +170,39 @@ function M.open()
 
 end
 
+function open_dir(path, files)
+  if #files > max_search then
+    return
+  end
+
+  local dir = vim.loop.fs_opendir(path, nil, 50)
+  if dir then
+    while true do
+      local entries = dir:readdir()
+      if not entries then
+        break
+      end
+
+      if #files > max_search then
+        return
+      end
+
+
+      for _, entry in ipairs(entries) do
+        if entry["type"] == "directory" then
+          local dir_name = entry["name"]
+          if not exclude_dirs[dir_name] then
+            open_dir(path .. "/" .. dir_name, files)
+          end
+        else
+          table.insert(files, path .. "/" .. entry["name"])
+        end
+      end
+    end
+    dir:closedir()
+  end
+end
+
 function M.do_mapping(id)
   local f = mappings_lookup[id]
   f()
@@ -206,8 +239,8 @@ end
 
 function M.setup(opts)
   opts = opts or {}
+  -- @deprecation_warnings
   vim.validate {
-    ["opts.excluded_pat"] = { opts.excluded_pat, 't', true },
     ["opts.mappings"] = { opts.mappings, 't', true },
   }
 
@@ -216,8 +249,16 @@ function M.setup(opts)
     ["opts.perc_height"] = { opts.perc_height, 'n', true },
   }
 
-  if opts.search_pat then
-    search_patterns = opts.search_pat
+  vim.validate {
+    ["opts.valid_ext"] = { opts.valid_ext, 't', true },
+  }
+
+  vim.validate {
+    ["opts.exclude_dirs"] = { opts.exclude_dirs, 't', true },
+  }
+
+  if opts.max_search then
+    max_search = opts.max_search
   end
 
   if opts.max_files then
@@ -228,16 +269,26 @@ function M.setup(opts)
     mappings = opts.mappings
   end
 
-  if opts.excluded_pat then
-    excluded_patterns = opts.excluded_pat
-  end
-
   if opts.perc_width then
     perc_width = opts.perc_width
   end
 
   if opts.perc_height then
     perc_height = opts.perc_height
+  end
+
+  if opts.valid_ext then
+    valid_ext = {}
+    for _, v in ipairs(opts.valid_ext) do
+      valid_ext[v] = true
+    end
+  end
+
+  if opts.exclude_dirs then
+    exclude_dirs = {}
+    for _, v in ipairs(opts.exclude_dirs) do
+      exclude_dirs[v] = true
+    end
   end
 end
 

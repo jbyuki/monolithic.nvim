@@ -8,7 +8,7 @@
 
 ## Requirements
 
-* Neovim 0.5
+* Neovim 0.7
 * [nvim-treesitter](https://github.com/nvim-treesitter/nvim-treesitter) 
 
 ## Install
@@ -41,10 +41,9 @@ Further configurations can be done through `setup()`.  Add the following to your
 lua << EOF
 require"monolithic".setup {
 
-  search_pat = { "**/*.lua",  "**/*.py" }, -- You can specify files patterns which will 
+  valid_ext = { "lua", "py", "cpp", "h" }, -- You have to specify which file patterns are opened
                                   -- be displayed inside the monolithic float
-  excluded_pat = { ".git/**/*" }, -- You can specify files patterns which will 
-                                  -- not be displayed inside the monolithic float
+  exclude_dirs = { ".git" },
   mappings = {
     ["<leader>s"] = require"monolithic".navigate, -- used whenever you want to jump back to the file from monolithic
   }
@@ -52,6 +51,7 @@ require"monolithic".setup {
   perc_width = 0.8, -- Editor width fraction which will be used by the monolithic float
   perc_height = 0.8, -- Same with height
   max_file = 100, -- Maximum number of files that can be opened in the buffer
+  max_search = 10000, -- Maximum number of files, it will search for
 }
 EOF
 ```
