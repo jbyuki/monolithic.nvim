@@ -51,7 +51,7 @@ require"monolithic".setup {
   perc_width = 0.8, -- Editor width fraction which will be used by the monolithic float
   perc_height = 0.8, -- Same with height
   max_file = 100, -- Maximum number of files that can be opened in the buffer
-  max_search = 10000, -- Maximum number of files, it will search for
+  max_search = 1000, -- Maximum number of files, it will search for
 }
 EOF
 ```
