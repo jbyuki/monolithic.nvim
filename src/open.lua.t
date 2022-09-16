@@ -243,6 +243,9 @@ vim.api.nvim_win_set_cursor(0, {lnum - 1, 0})
 
 @get_filename_and_line_of_current+=
 local curfn = vim.fn.expand("%")
+if curfn:sub(1,1) ~= "." then
+  curfn = "./" .. curfn 
+end
 local currow, _ = unpack(vim.api.nvim_win_get_cursor(0))
 
 @goto_filename_and_line_of_current+=
@@ -277,7 +280,7 @@ if has_ts then
   local ts_parsers = require'nvim-treesitter.parsers'
   
   local lang = ts_parsers.ft_to_lang(ft)
-  if ts_parsers.has_parser(lang) then
+  if vim.treesitter.get_parser(buf, lang) then
     ts_highlight.attach(buf, lang)
     has_highlighter = true
   end

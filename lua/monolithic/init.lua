@@ -82,6 +82,9 @@ function M.open()
 
 
   local curfn = vim.fn.expand("%")
+  if curfn:sub(1,1) ~= "." then
+    curfn = "./" .. curfn 
+  end
   local currow, _ = unpack(vim.api.nvim_win_get_cursor(0))
 
   local ft = vim.api.nvim_buf_get_option(0, "ft")
@@ -139,7 +142,7 @@ function M.open()
       local ts_parsers = require'nvim-treesitter.parsers'
       
       local lang = ts_parsers.ft_to_lang(ft)
-      if ts_parsers.has_parser(lang) then
+      if vim.treesitter.get_parser(buf, lang) then
         ts_highlight.attach(buf, lang)
         has_highlighter = true
       end
