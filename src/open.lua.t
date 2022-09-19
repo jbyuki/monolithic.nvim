@@ -243,6 +243,7 @@ vim.api.nvim_win_set_cursor(0, {lnum - 1, 0})
 
 @get_filename_and_line_of_current+=
 local curfn = vim.fn.expand("%")
+curfn = curfn:gsub('\\', '/')
 if curfn:sub(1,1) ~= "." then
   curfn = "./" .. curfn 
 end

@@ -82,6 +82,7 @@ function M.open()
 
 
   local curfn = vim.fn.expand("%")
+  curfn = curfn:gsub('\\', '/')
   if curfn:sub(1,1) ~= "." then
     curfn = "./" .. curfn 
   end
