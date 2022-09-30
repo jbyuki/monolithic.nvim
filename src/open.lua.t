@@ -12,11 +12,14 @@ function M.open()
   @get_filename_and_line_of_current
   @get_file_filetype
   @create_float_window
+  @set_window_foldmethod
   @set_window_filetype
   @set_highlights_titles
   @setup_folds
   @setup_mappings
-  @setup_highlighter
+  if highlight then
+    @setup_highlighter
+  end
   @close_float_on_leave
   @goto_filename_and_line_of_current
 end
@@ -303,3 +306,6 @@ if #files > max_files then
   vim.api.nvim_echo({{("ERROR(monolithic.nvim): Too many files (limit at %d)! Found %d. Configure limit with max_files settings"):format(max_files, #files), "ErrorMsg"}}, true, {})
   return
 end
+
+@set_window_foldmethod+=
+vim.wo[win].foldmethod = "manual"

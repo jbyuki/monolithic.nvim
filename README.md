@@ -52,6 +52,7 @@ require"monolithic".setup {
   perc_height = 0.8, -- Same with height
   max_file = 100, -- Maximum number of files that can be opened in the buffer
   max_search = 1000, -- Maximum number of files, it will search for
+  highlight = true, -- Setting this false can increase the speed a lot!
 }
 EOF
 ```
