@@ -1,13 +1,12 @@
 ##monolithic
 @implement+=
-function M.open()
+function M.open(pat)
   @glob_all_files_in_cwd
   @check_max_files_limit
   
   @create_scratch_buffer
 
   @append_all_files_to_buffer
-  @stop_timer_2
 
   @get_filename_and_line_of_current
   @get_file_filetype
@@ -77,10 +76,17 @@ if #files > max_search then
   return
 end
 
-files = vim.tbl_filter(function(fn) 
-  local ext = fn:match("%.([^.]*)$")
-  return valid_ext[ext] end, 
-files)
+if pat then
+	files = vim.tbl_filter(function(fn) 
+		local ext = fn:match("%.([^.]*)$")
+		return ext == pat end, 
+	files)
+else
+	files = vim.tbl_filter(function(fn) 
+		local ext = fn:match("%.([^.]*)$")
+		return valid_ext[ext] end, 
+	files)
+end
 
 @create_scratch_buffer+=
 local buf = vim.api.nvim_create_buf(false, true)

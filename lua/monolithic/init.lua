@@ -33,7 +33,7 @@ local exclude_dirs = {
 
 local highlight = true
 
-function M.open()
+function M.open(pat)
   local files = {}
   open_dir(".", files)
 
@@ -42,10 +42,17 @@ function M.open()
     return
   end
 
-  files = vim.tbl_filter(function(fn) 
-    local ext = fn:match("%.([^.]*)$")
-    return valid_ext[ext] end, 
-  files)
+  if pat then
+  	files = vim.tbl_filter(function(fn) 
+  		local ext = fn:match("%.([^.]*)$")
+  		return ext == pat end, 
+  	files)
+  else
+  	files = vim.tbl_filter(function(fn) 
+  		local ext = fn:match("%.([^.]*)$")
+  		return valid_ext[ext] end, 
+  	files)
+  end
 
   if #files > max_files then
     vim.api.nvim_echo({{("ERROR(monolithic.nvim): Too many files (limit at %d)! Found %d. Configure limit with max_files settings"):format(max_files, #files), "ErrorMsg"}}, true, {})
