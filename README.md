@@ -15,11 +15,27 @@
 
 The easiest method is install through plugin manager such as [vim-plug](https://github.com/junegunn/vim-plug).
 
-Add this to your plug-in list:
+### vim-plug
 
 ```vim
 Plug 'jbyuki/monolithic.nvim'
 ```
+
+### packer.nvim
+
+```vim
+use 'jbyuki/monolithic.nvim'
+```
+
+### built-in plugin manager
+
+* Create a folder `pack/<a folder name of your choosing>/start`
+* Inside the `start` folder `git clone` monolithic.
+  * `git clone https://github.com/jbyuki/monolithic.nvim`
+* In your init.lua, add the pack folder to packpath (see `:help packpath`)
+  ```lua
+  vim.o.packpath = vim.o.packpath .. ",<path to where pack/ is located>"
+  ```
 
 ## Quick start
 
@@ -52,6 +68,7 @@ require"monolithic".setup {
   perc_height = 0.8, -- Same with height
   max_file = 100, -- Maximum number of files that can be opened in the buffer
   max_search = 1000, -- Maximum number of files, it will search for
+  highlight = true, -- Setting this false can increase the speed a lot!
 }
 EOF
 ```

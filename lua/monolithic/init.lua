@@ -31,10 +31,9 @@ local exclude_dirs = {
   ["__pycache__"] = true,
 }
 
+local highlight = true
 
-local enable_highlight = true
-
-function M.open()
+function M.open(pat)
   local files = {}
   open_dir(".", files)
 
@@ -43,15 +42,23 @@ function M.open()
     return
   end
 
-  files = vim.tbl_filter(function(fn) 
-    local ext = fn:match("%.([^.]*)$")
-    return valid_ext[ext] end, 
-  files)
+  if pat then
+  	files = vim.tbl_filter(function(fn) 
+  		local ext = fn:match("%.([^.]*)$")
+  		return ext == pat end, 
+  	files)
+  else
+  	files = vim.tbl_filter(function(fn) 
+  		local ext = fn:match("%.([^.]*)$")
+  		return valid_ext[ext] end, 
+  	files)
+  end
 
   if #files > max_files then
     vim.api.nvim_echo({{("ERROR(monolithic.nvim): Too many files (limit at %d)! Found %d. Configure limit with max_files settings"):format(max_files, #files), "ErrorMsg"}}, true, {})
     return
   end
+
   
   local buf = vim.api.nvim_create_buf(false, true)
 
@@ -109,6 +116,7 @@ function M.open()
     border = "single",
   })
 
+  vim.wo[win].foldmethod = "manual"
   -- vim.api.nvim_buf_set_option(0, "ft", ft)
 
   local ns_id = vim.api.nvim_create_namespace("")
@@ -138,27 +146,29 @@ function M.open()
     mapping_id = mapping_id + 1
   end
 
-  local has_highlighter = false
-  if not has_highlighter and enable_highlight then
-    local has_ts = pcall(require, 'nvim-treesitter')
-    if has_ts then
-      local ts_highlight = require'nvim-treesitter.highlight'
-      local ts_parsers = require'nvim-treesitter.parsers'
-      
-      local lang = ts_parsers.ft_to_lang(ft)
-      if vim.treesitter.get_parser(buf, lang) then
-        ts_highlight.attach(buf, lang)
-        has_highlighter = true
+  if highlight then
+    local has_highlighter = false
+    if not has_highlighter then
+      local has_ts = pcall(require, 'nvim-treesitter')
+      if has_ts then
+        local ts_highlight = require'nvim-treesitter.highlight'
+        local ts_parsers = require'nvim-treesitter.parsers'
+        
+        local lang = ts_parsers.ft_to_lang(ft)
+        if vim.treesitter.get_parser(buf, lang) then
+          ts_highlight.attach(buf, lang)
+          has_highlighter = true
+        end
       end
+
+    end
+
+    if not has_highlighter then
+      vim.api.nvim_buf_set_option(buf, "syntax", ft)
+
     end
 
   end
-
-  if not has_highlighter and enable_highlight then
-    vim.api.nvim_buf_set_option(buf, "syntax", ft)
-
-  end
-
   vim.api.nvim_command("autocmd WinLeave * ++once lua vim.api.nvim_win_close(" .. win .. ", false)")
 
   local cur
@@ -265,7 +275,7 @@ function M.setup(opts)
   }
 
   vim.validate {
-    ["opts.highlight"] = { opts.highlight, 'b', true },
+    ["opts.highlight"] = { opts.enable_highlight, 'b', true },
   }
 
   if opts.max_search then
@@ -303,7 +313,7 @@ function M.setup(opts)
   end
 
   if opts.highlight ~= nil then
-  	enable_highlight = opts.highlight
+    highlight = opts.highlight
   end
 end
 

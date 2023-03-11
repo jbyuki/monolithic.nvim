@@ -1,22 +1,24 @@
 ##monolithic
 @implement+=
-function M.open()
+function M.open(pat)
   @glob_all_files_in_cwd
   @check_max_files_limit
   
   @create_scratch_buffer
 
   @append_all_files_to_buffer
-  @stop_timer_2
 
   @get_filename_and_line_of_current
   @get_file_filetype
   @create_float_window
+  @set_window_foldmethod
   @set_window_filetype
   @set_highlights_titles
   @setup_folds
   @setup_mappings
-  @setup_highlighter
+  if highlight then
+    @setup_highlighter
+  end
   @close_float_on_leave
   @goto_filename_and_line_of_current
 end
@@ -74,10 +76,17 @@ if #files > max_search then
   return
 end
 
-files = vim.tbl_filter(function(fn) 
-  local ext = fn:match("%.([^.]*)$")
-  return valid_ext[ext] end, 
-files)
+if pat then
+	files = vim.tbl_filter(function(fn) 
+		local ext = fn:match("%.([^.]*)$")
+		return ext == pat end, 
+	files)
+else
+	files = vim.tbl_filter(function(fn) 
+		local ext = fn:match("%.([^.]*)$")
+		return valid_ext[ext] end, 
+	files)
+end
 
 @create_scratch_buffer+=
 local buf = vim.api.nvim_create_buf(false, true)
@@ -266,11 +275,11 @@ end
 
 @setup_highlighter+=
 local has_highlighter = false
-if not has_highlighter and enable_highlight then
+if not has_highlighter then
   @setup_treesitter_highlighter
 end
 
-if not has_highlighter and enable_highlight then
+if not has_highlighter then
   @setup_regex_highlighter
 end
 
@@ -303,3 +312,6 @@ if #files > max_files then
   vim.api.nvim_echo({{("ERROR(monolithic.nvim): Too many files (limit at %d)! Found %d. Configure limit with max_files settings"):format(max_files, #files), "ErrorMsg"}}, true, {})
   return
 end
+
+@set_window_foldmethod+=
+vim.wo[win].foldmethod = "manual"

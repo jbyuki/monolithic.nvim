@@ -83,17 +83,15 @@ if opts.exclude_dirs then
   end
 end
 
-@script_variables+=
-
 @validate_setup_options+=
 vim.validate {
-  ["opts.highlight"] = { opts.highlight, 'b', true },
+  ["opts.highlight"] = { opts.enable_highlight, 'b', true },
 }
 
 @script_variables+=
-local enable_highlight = true
+local highlight = true
 
 @set_options+=
 if opts.highlight ~= nil then
-	enable_highlight = opts.highlight
+  highlight = opts.highlight
 end
