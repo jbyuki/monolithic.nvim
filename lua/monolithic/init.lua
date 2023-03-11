@@ -31,6 +31,9 @@ local exclude_dirs = {
   ["__pycache__"] = true,
 }
 
+
+local enable_highlight = true
+
 function M.open()
   local files = {}
   open_dir(".", files)
@@ -136,7 +139,7 @@ function M.open()
   end
 
   local has_highlighter = false
-  if not has_highlighter then
+  if not has_highlighter and enable_highlight then
     local has_ts = pcall(require, 'nvim-treesitter')
     if has_ts then
       local ts_highlight = require'nvim-treesitter.highlight'
@@ -151,7 +154,7 @@ function M.open()
 
   end
 
-  if not has_highlighter then
+  if not has_highlighter and enable_highlight then
     vim.api.nvim_buf_set_option(buf, "syntax", ft)
 
   end
@@ -261,6 +264,10 @@ function M.setup(opts)
     ["opts.exclude_dirs"] = { opts.exclude_dirs, 't', true },
   }
 
+  vim.validate {
+    ["opts.highlight"] = { opts.highlight, 'b', true },
+  }
+
   if opts.max_search then
     max_search = opts.max_search
   end
@@ -293,6 +300,10 @@ function M.setup(opts)
     for _, v in ipairs(opts.exclude_dirs) do
       exclude_dirs[v] = true
     end
+  end
+
+  if opts.highlight ~= nil then
+  	enable_highlight = opts.highlight
   end
 end
 

@@ -266,11 +266,11 @@ end
 
 @setup_highlighter+=
 local has_highlighter = false
-if not has_highlighter then
+if not has_highlighter and enable_highlight then
   @setup_treesitter_highlighter
 end
 
-if not has_highlighter then
+if not has_highlighter and enable_highlight then
   @setup_regex_highlighter
 end
 
