@@ -257,26 +257,17 @@ end
 function M.setup(opts)
   opts = opts or {}
   -- @deprecation_warnings
-  vim.validate {
-    ["opts.mappings"] = { opts.mappings, 't', true },
-  }
+  vim.validate("opts.mappings", opts.mappings, "table", true)
 
-  vim.validate {
-    ["opts.perc_width"] = { opts.perc_width, 'n', true },
-    ["opts.perc_height"] = { opts.perc_height, 'n', true },
-  }
 
-  vim.validate {
-    ["opts.valid_ext"] = { opts.valid_ext, 't', true },
-  }
+  vim.validate("opts.perc_width", opts.perc_width, "number", true)
+  vim.validate("opts.perc_height", opts.perc_height, "number", true)
 
-  vim.validate {
-    ["opts.exclude_dirs"] = { opts.exclude_dirs, 't', true },
-  }
+  vim.validate("opts.valid_ext", opts.valid_ext, "table", true)
 
-  vim.validate {
-    ["opts.highlight"] = { opts.enable_highlight, 'b', true },
-  }
+  vim.validate("opts.exclude_dirs", opts.exclude_dirs, "table", true)
+
+  vim.validate("opts.highlight", opts.highlight, "boolean", true)
 
   if opts.max_search then
     max_search = opts.max_search

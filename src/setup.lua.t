@@ -8,9 +8,7 @@ function M.setup(opts)
 end
 
 @validate_setup_options+=
-vim.validate {
-  ["opts.mappings"] = { opts.mappings, 't', true },
-}
+vim.validate("opts.mappings", opts.mappings, "table", true)
 
 @set_options+=
 if opts.mappings then
@@ -18,10 +16,9 @@ if opts.mappings then
 end
 
 @validate_setup_options+=
-vim.validate {
-  ["opts.perc_width"] = { opts.perc_width, 'n', true },
-  ["opts.perc_height"] = { opts.perc_height, 'n', true },
-}
+
+vim.validate("opts.perc_width", opts.perc_width, "number", true)
+vim.validate("opts.perc_height", opts.perc_height, "number", true)
 
 @set_options+=
 if opts.perc_width then
@@ -42,9 +39,7 @@ if opts.excluded_pat then
 end
 
 @validate_setup_options+=
-vim.validate {
-  ["opts.valid_ext"] = { opts.valid_ext, 't', true },
-}
+vim.validate("opts.valid_ext", opts.valid_ext, "table", true)
 
 @script_variables+=
 local valid_ext = {
@@ -71,9 +66,7 @@ local exclude_dirs = {
 }
 
 @validate_setup_options+=
-vim.validate {
-  ["opts.exclude_dirs"] = { opts.exclude_dirs, 't', true },
-}
+vim.validate("opts.exclude_dirs", opts.exclude_dirs, "table", true)
 
 @set_options+=
 if opts.exclude_dirs then
@@ -84,9 +77,7 @@ if opts.exclude_dirs then
 end
 
 @validate_setup_options+=
-vim.validate {
-  ["opts.highlight"] = { opts.enable_highlight, 'b', true },
-}
+vim.validate("opts.highlight", opts.highlight, "boolean", true)
 
 @script_variables+=
 local highlight = true

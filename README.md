@@ -8,7 +8,7 @@
 
 ## Requirements
 
-* Neovim 0.7
+* Neovim nightly
 * [nvim-treesitter](https://github.com/nvim-treesitter/nvim-treesitter) 
 
 ## Install
